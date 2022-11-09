@@ -7,6 +7,41 @@ import unittest
 
 
 def get_listings_from_search_results(html_file):
+    f = open(html_file)
+    soup = BeautifulSoup(f, 'html.parser')
+
+    Property_info = []
+
+    Properties = soup.findAll("div",{"id":re.compile("title_")})
+
+    for property in Properties:
+        tempTuple = []
+
+        #Get name of property
+        tempTuple.append(property.get_text())
+        
+        
+        #Get price
+        tempPrice = property.parent.findAll("div")[-1].get_text()[1:]
+        for i in range(len(tempPrice)):
+            if not tempPrice[i].isalnum() or tempPrice[i] == "$":
+                tempTuple.append(int(tempPrice[0:i]))
+                break
+        
+        #Get ID
+        tempTuple.append(property.get('id')[6:])
+        
+
+        Property_info.append(tuple(tempTuple))
+        
+   # for property in Property_info:
+   #     print(property)
+        
+    
+
+    f.close()
+    return Property_info
+
     """
     Write a function that creates a BeautifulSoup object on html_file. Parse
     through the object and return a list of tuples containing:
@@ -29,6 +64,47 @@ def get_listings_from_search_results(html_file):
 
 
 def get_listing_information(listing_id):
+
+    listofFiles = next(os.walk("./html_files"))
+    fileMatch = [os.path.join(listofFiles[0],x) for x in listofFiles[2] if "listing_" in x and "reviews" not in x and "_"+str(listing_id)+"." in x][0]
+    
+    print(listing_id)
+    f = open(fileMatch)
+    soup = BeautifulSoup(f, 'html.parser')
+
+    policyNum = soup.find(text = re.compile("Policy number:")).parent.find("span").get_text()
+
+    if "exempt" in policyNum.lower() or "not" in policyNum.lower(): policyNum = "Exempt"
+    if "pending" in policyNum.lower(): policyNum = "Pending"
+
+    InformationBox = soup.find("div",{"data-section-id":"OVERVIEW_DEFAULT"})
+    subHeading = InformationBox.find("h2").get_text()
+    
+    typeString  = "Entire Room"
+    if "private" in subHeading.lower(): 
+        typeString = "Private Room"
+    elif "shared" in subHeading.lower(): 
+        typeString = "Shared Room"
+
+
+    bedroomText = InformationBox.find(text = re.compile("(?i)bedroom|studio")).get_text()
+
+    bedCount = 0
+    if "studio" in bedroomText.lower(): 
+        bedCount = 1
+    else: 
+        try:
+            bedCount = int(bedroomText.lower().replace("bedrooms","").replace("bedroom",""))
+        except:
+            bedCount = -1
+
+    print((policyNum,typeString,bedCount))
+    f.close()
+
+    return (policyNum,typeString,bedCount)
+
+    
+
     """
     Write a function to return relevant information in a tuple from an Airbnb listing id.
     NOTE: Use the static files in the html_files folder, do NOT send requests to the actual website.
@@ -52,7 +128,7 @@ def get_listing_information(listing_id):
         number of bedrooms
     )
     """
-    pass
+    
 
 
 def get_detailed_listing_database(html_file):
