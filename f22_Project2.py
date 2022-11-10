@@ -34,9 +34,6 @@ def get_listings_from_search_results(html_file):
 
         Property_info.append(tuple(tempTuple))
         
-   # for property in Property_info:
-   #     print(property)
-        
     
 
     f.close()
@@ -68,7 +65,7 @@ def get_listing_information(listing_id):
     listofFiles = next(os.walk("./html_files"))
     fileMatch = [os.path.join(listofFiles[0],x) for x in listofFiles[2] if "listing_" in x and "reviews" not in x and "_"+str(listing_id)+"." in x][0]
     
-    print(listing_id)
+    #print(listing_id)
     f = open(fileMatch)
     soup = BeautifulSoup(f, 'html.parser')
 
@@ -98,7 +95,6 @@ def get_listing_information(listing_id):
         except:
             bedCount = -1
 
-    print((policyNum,typeString,bedCount))
     f.close()
 
     return (policyNum,typeString,bedCount)
@@ -132,6 +128,13 @@ def get_listing_information(listing_id):
 
 
 def get_detailed_listing_database(html_file):
+    first = get_listings_from_search_results(html_file)
+    emptylst = []
+    for list in first:
+        listing_info = get_listing_information(list[2])
+        emptylst.append(list + listing_info)
+   #print(emptylst)
+    return emptylst
     """
     Write a function that calls the above two functions in order to return
     the complete listing information using the functions you’ve created.
@@ -149,6 +152,8 @@ def get_detailed_listing_database(html_file):
 
 
 def write_csv(data, filename):
+    
+
     """
     Write a function that takes in a list of tuples (called data, i.e. the
     one that is returned by get_detailed_listing_database()), sorts the tuples in
@@ -174,6 +179,8 @@ def write_csv(data, filename):
 
 
 def check_policy_numbers(data):
+    #reg1 = '20/d{2}-00\d{4}STR$'
+    
     """
     Write a function that takes in a list of tuples called data, (i.e. the one that is returned by
     get_detailed_listing_database()), and parses through the policy number of each, validating the
