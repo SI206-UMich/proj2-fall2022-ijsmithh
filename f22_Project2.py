@@ -244,7 +244,7 @@ def extra_credit(listing_id):
     pass
 
 
-class TestCases(unittest.TestCase):
+class TestCases(unittest.TestCase): 
 
     def test_get_listings_from_search_results(self):
         # call get_listings_from_search_results("html_files/mission_district_search_results.html")
